@@ -1,0 +1,19 @@
+{
+  "name": "ludo-online",
+  "version": "1.0.0",
+  "description": "Play Ludo online for free instantly! Classic board game, multiplayer & vs computer.",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ludo",
+    "board-game",
+    "online-game"
+  ],
+  "author": "Resence Games",
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
+}
