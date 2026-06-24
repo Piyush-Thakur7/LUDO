@@ -220,6 +220,7 @@ const LudoGame = (() => {
         if (tok.pos === 56) {
             showNotice('Token home! 🏠');
             if (window.LudoSounds) LudoSounds.playTokenHome();
+            grantExtra = true; // Extra turn for reaching home
         }
 
         // ── Win check ──

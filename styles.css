@@ -1199,6 +1199,13 @@ body.theater-mode .board-wrapper {
         font-size: 13px;
         width: 50px;
     }
+    .scoreboard-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    .score-card {
+        padding: 8px 12px;
+    }
 }
 
 .scoreboard-grid {
@@ -1218,6 +1225,8 @@ body.theater-mode .board-wrapper {
     border-radius: var(--border-radius-md);
     border: 3px solid var(--neutral-dark);
     box-shadow: 0 3px 0px var(--neutral-dark);
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .score-info {

@@ -83,46 +83,40 @@ const LudoAI = (() => {
         function getHardChoice() {
             const moveDetails = validMoves.map(getMoveDetails).filter(Boolean);
 
-            // 1. Capture priority: check if any move captures an opponent
+            // 1. Capture priority: Always capture an opponent's token if available
             const captureMoves = moveDetails.filter(d => wouldCapture(player, d.destPos, allTokens));
             if (captureMoves.length > 0) {
-                // If multiple, prioritize the one that is most progressed (highest current pos)
                 captureMoves.sort((a, b) => b.tok.pos - a.tok.pos);
                 return captureMoves[0].move;
             }
 
-            // 2. Protect near home priority: check if any move protects a token near home (pos >= 30 and pos < 51)
-            const protectMoves = moveDetails.filter(d => {
-                const tok = d.tok;
-                if (tok.pos < 30 || tok.pos >= 51) return false;
-
-                const currentDanger = isInDanger(player, tok.pos, allTokens);
-                const currentSafe = landsSafe(player, tok.pos);
-                
-                const destDanger = isInDanger(player, d.destPos, allTokens);
-                const destSafe = landsSafe(player, d.destPos) || d.destPos >= 51;
-
-                // Case A: Escaping danger to safety (either dest is safe or not in danger)
-                if (currentDanger && (!destDanger || destSafe)) {
-                    return true;
-                }
-                // Case B: Moving from an unsafe tile to a safe tile/home stretch
-                if (!currentSafe && destSafe) {
-                    return true;
-                }
-
-                return false;
-            });
-
-            if (protectMoves.length > 0) {
-                // Prioritize the one closest to home (highest current pos)
-                protectMoves.sort((a, b) => b.tok.pos - a.tok.pos);
-                return protectMoves[0].move;
+            // 2. Home column / Finish priority: Always move a token into the home stretch/finish
+            const homeMoves = moveDetails.filter(d => d.tok.pos <= 50 && d.destPos >= 51);
+            if (homeMoves.length > 0) {
+                homeMoves.sort((a, b) => b.tok.pos - a.tok.pos);
+                return homeMoves[0].move;
             }
 
-            // 3. Fallback / Advance priority: advance the most progressed token (highest current pos)
-            moveDetails.sort((a, b) => b.tok.pos - a.tok.pos);
-            return moveDetails[0].move;
+            // 3. Unlock priority: Prefer moving a token out of the yard when a 6 is rolled
+            if (dice === 6) {
+                const unlockMoves = moveDetails.filter(d => d.tok.pos === -1);
+                if (unlockMoves.length > 0) {
+                    return unlockMoves[0].move;
+                }
+            }
+
+            // 4. Danger avoidance: Avoid moving a token onto a square where it would be immediately capturable, if a safer move exists
+            const safeMoves = moveDetails.filter(d => {
+                if (d.destPos >= 51) return true; // Home stretch and finish are safe
+                return !isInDanger(player, d.destPos, allTokens);
+            });
+
+            // Use safe moves if any exist; otherwise fallback to all moves
+            const choices = safeMoves.length > 0 ? safeMoves : moveDetails;
+
+            // 5. Progress priority: Move the token that is furthest along its path
+            choices.sort((a, b) => b.tok.pos - a.tok.pos);
+            return choices[0].move;
         }
 
         // Medium: 70% smart (Hard decision), 30% random

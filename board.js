@@ -29,7 +29,7 @@ const LudoBoard = (() => {
     ];
 
     /** Safe zone indices (star tiles — cannot be captured here) */
-    const SAFE = [1, 8, 14, 21, 27, 34, 40, 47];
+    const SAFE = [1, 9, 14, 22, 27, 35, 40, 48];
 
     /** Where each color enters the outer track (relative position 0) */
     const START = { red: 40, green: 1, yellow: 14, blue: 27 };
