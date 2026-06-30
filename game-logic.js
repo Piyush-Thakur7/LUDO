@@ -25,6 +25,7 @@ const LudoGame = (() => {
     let hitboxes = [];      // [{player, id, x, y, r}] from last render
     let animFrame = null;   // Animation loop handle
     let aiTimer = null;     // AI delay timer
+    let yardRollsCount = { red: 0, green: 0, yellow: 0, blue: 0 };
 
     // ─── Helpers ──────────────────────────────────────────
 
@@ -107,7 +108,27 @@ const LudoGame = (() => {
         state = 'rolling';
         LudoDice.setClickable(false);
 
-        const value = Math.floor(Math.random() * 6) + 1;
+        const p = curPlayer();
+        const activeOnBoard = tokens.filter(t => t.player === p && t.pos >= 0 && t.pos < 56).length;
+
+        let value;
+        // Pity rule: If a player has all active tokens in the yard and rolls 3 times without a 6,
+        // guarantee a 6 on the 4th roll so they aren't stuck forever.
+        if (activeOnBoard === 0 && yardRollsCount[p] >= 3) {
+            value = 6;
+            yardRollsCount[p] = 0;
+        } else {
+            value = Math.floor(Math.random() * 6) + 1;
+            if (activeOnBoard === 0) {
+                if (value === 6) {
+                    yardRollsCount[p] = 0;
+                } else {
+                    yardRollsCount[p]++;
+                }
+            } else {
+                yardRollsCount[p] = 0;
+            }
+        }
         diceVal = value;
 
         LudoDice.animateRoll(value, () => {
@@ -372,6 +393,7 @@ const LudoGame = (() => {
             diceVal = 0;
             sixCount = 0;
             grantExtra = false;
+            yardRollsCount = { red: 0, green: 0, yellow: 0, blue: 0 };
             state = 'waitRoll';
             validMoves = [];
 
